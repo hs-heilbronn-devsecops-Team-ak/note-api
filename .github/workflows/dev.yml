@@ -36,15 +36,16 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -n auto --maxfail=1 --cov=. --cov-report=term  # Run tests in parallel (all CPUs) with coverage
+          pytest -n auto --maxfail=1 --cov=. --cov-report=term  
 
-       # Optionally, upload test coverage as an artifact (for reviewing later)
-      - name: Upload coverage report
-        if: success()
+      - name: Generate HTML coverage report
         run: |
-          pytest --cov-report=html  # Generate an HTML report for coverage
-          tar -czf coverage-report.tar.gz htmlcov/  # Compress coverage report
-
+          pytest --cov=. --cov-report=html  # Generate HTML report
+    
+      - name: Compress coverage report
+        run: |
+          tar -czf coverage-report.tar.gz htmlcov/  
+  
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v3
         with:
