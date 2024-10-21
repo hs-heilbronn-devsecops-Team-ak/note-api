@@ -38,8 +38,15 @@ jobs:
         run: |
           pytest -n auto --maxfail=1 --cov=. --cov-report=term  # Run tests in parallel (all CPUs) with coverage
 
-      - name: Submit coverage to Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}  # Use your personal token here
+       # Optionally, upload test coverage as an artifact (for reviewing later)
+      - name: Upload coverage report
+        if: success()
         run: |
-          coveralls
+          pytest --cov-report=html  # Generate an HTML report for coverage
+          tar -czf coverage-report.tar.gz htmlcov/  # Compress coverage report
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage-report.tar.gz
