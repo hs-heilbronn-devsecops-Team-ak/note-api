@@ -1,9 +1,14 @@
-name: CI Pipeline
+name: dev_Pipeline
 
 on:
+  push:
+    branches:
+      - main 
+      - kiran_pytest
   pull_request:
     branches:
       - main 
+      - kiran_pytest
 
 jobs:
   test:
