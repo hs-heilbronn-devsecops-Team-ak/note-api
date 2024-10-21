@@ -1,49 +1,48 @@
-name: dev_Pipeline
-on: 
-  push: 
-    branches:
-      - main
+name: CI Pipeline
+
+on:
   pull_request:
     branches:
-      - main  
+      - main 
+
 jobs:
-  check:
+  test:
     runs-on: ubuntu-latest
 
-    # Use the maximum number of CPUs available
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.8, 3.9, 3.10]  
-        
+        python-version: [3.10]  
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.10.4'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt  
+          pip install -r requirements.txt  
 
-      - name: Run Tests
+      - name: Run tests
         run: |
-          pytest -n auto --maxfail=1 --cov=. --cov-report=term
+          pytest -n auto --maxfail=1 --cov=. --cov-report=term  # Run tests in parallel (all CPUs) with coverage
 
       - name: Upload coverage report
         if: success()
         run: |
-            pip install coveralls  
-            coveralls
+          pip install coveralls  # Optional: for uploading coverage reports
+          coveralls
 
-      - name: Cache Python packages
+      - name: Cache dependencies
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
