@@ -4,9 +4,11 @@ on:
   push: 
     branches:
       - main
+      - ankita_pytest
   pull_request:
     branches:
       - main  
+      - ankita_pytest
 
 jobs:
   check:
