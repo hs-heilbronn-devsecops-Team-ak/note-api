@@ -44,7 +44,7 @@ jobs:
           files: ./coverage.xml
 
       - name: Security Scan with Snyk
-        uses: snyk/actions/setup@v3
+        uses: snyk/actions/setup@v1
         with:
           token: ${{secrets.SNYK_TOKEN }}
 
