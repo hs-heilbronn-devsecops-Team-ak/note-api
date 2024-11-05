@@ -52,11 +52,9 @@ jobs:
           files: ./coverage.xml
 
       - name: Security Scan with Snyk
-        if: github.ref == 'refs/heads/main'
-        uses: snyk/actions/setup@main
+        uses: snyk/actions/setup@v3
         with:
           token: ${{secrets.SNYK_TOKEN }}
 
       - name: Run Snyk to check for vulnerabilities
-        if: github.ref == 'refs/heads/main'
         run: snyk test --file=requirements.txt --severity-threshold=medium
