@@ -48,14 +48,14 @@ jobs:
         if: success()
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
 
       - name: Security Scan with Snyk
         if: github.ref == 'refs/heads/main'
         uses: snyk/actions/setup@main
         with:
-          token: ${{ secrets.SNYK_TOKEN }}
+          token: ${{secrets.SNYK_TOKEN }}
 
       - name: Run Snyk to check for vulnerabilities
         if: github.ref == 'refs/heads/main'
