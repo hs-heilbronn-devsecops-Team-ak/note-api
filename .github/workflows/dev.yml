@@ -53,7 +53,7 @@ jobs:
 
       - name: Security Scan with Snyk
         if: github.ref == 'refs/heads/main'
-        uses: snyk/actions/setup@v3
+        uses: snyk/actions/setup@v1
         with:
           token: ${{ secrets.SNYK_TOKEN }}
 
