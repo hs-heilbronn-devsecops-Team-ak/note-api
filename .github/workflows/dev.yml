@@ -55,5 +55,5 @@ jobs:
           name: code-coverage-report
 
       - name: Run Snyk Security Scan
-        uses: snyk/actions/setup@latest  # Set up Snyk for security scanning
+        uses: snyk/actions@v2.2.0   # Set up Snyk for security scanning
 
