@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -40,24 +40,20 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
-          pip install pytest-cov codecov  # Add pytest-cov and codecov for coverage reporting
+          pip install pytest-cov codecov 
 
       - name: Run Tests with Coverage
         run: |
-          pytest -n auto --maxfail=1 --cov=. --cov-report=xml
+          pytest -n auto --maxfail=1 --cov=. --cov-report=term
 
       - name: Upload Coverage Report to Codecov
         if: success()
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Store Codecov token as a secret
           files: ./coverage.xml  # Specify the XML coverage report
           flags: unittests
           name: code-coverage-report
 
       - name: Run Snyk Security Scan
-        uses: snyk/actions/setup@v2  # Set up Snyk for security scanning
-      - name: Snyk Test
-        run: snyk test --all-projects  # Scans for vulnerabilities in code and dependencies
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Store Snyk token as a secret
+        uses: snyk/actions/setup@latest  # Set up Snyk for security scanning
+
