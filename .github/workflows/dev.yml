@@ -1,52 +1,52 @@
-name: dev_Pipeline
+name: dev pipeline
 
-on: 
-  push: 
-    branches:
-      - main
-      - ankita_pytest
+on:
   pull_request:
     branches:
-      - main  
-      - ankita_pytest
+      - ankita_pytest  # Run tests on pull requests to this branch
+  push:
+    branches:
+      - main 
+        - ankita_pytest  # Run security scan on every push to main
 
 jobs:
-  check:
+  # Job to run tests and measure coverage
+  test:
     runs-on: ubuntu-latest
 
-    # Use the maximum number of CPUs available
-    strategy:
-      matrix:
-        python-version: [3.9, 3.10.4, 3.11]  
-        
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.x'  # Specify your Python version, e.g., 3.8
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-          pip install pytest-cov codecov 
+          pip install pytest pytest-cov pytest-xdist  # Install pytest tools
 
-      - name: Run Tests with Coverage
-        run: |
-          pytest -n auto --maxfail=1 --cov=. --cov-report=term
+      - name: Run tests with pytest in parallel
+        run: pytest -n auto --cov=.  # -n auto uses all available CPUs for parallel tests
 
-      - name: Upload Coverage Report to Codecov
-        if: success()
-        uses: codecov/codecov-action@v3
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
         with:
-          files: ./coverage.xml  # Specify the XML coverage report
-          flags: unittests
-          name: code-coverage-report
+          token: ${{ secrets.CODECOV_TOKEN }}  # Ensure CODECOV_TOKEN is set in GitHub Secrets
 
-      - name: Run Snyk Security Scan
-        uses: snyk/actions/setup@v2
-        # Set up Snyk for security scanning
+  # Job to run Snyk security scan on main branch
+  snyk:
+    needs: test  # Run after test job completes
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Ensure SNYK_TOKEN is set in GitHub Secrets
