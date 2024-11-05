@@ -3,11 +3,12 @@ name: dev pipeline
 on:
   pull_request:
     branches:
+      - main
       - ankita_pytest  # Run tests on pull requests to this branch
   push:
     branches:
       - main 
-        - ankita_pytest  # Run security scan on every push to main
+      - ankita_pytest  # Run security scan on every push to main
 
 jobs:
   # Job to run tests and measure coverage
