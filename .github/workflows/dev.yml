@@ -1,4 +1,5 @@
 name: dev_Pipeline
+
 on: 
   push: 
     branches:
@@ -6,11 +7,11 @@ on:
   pull_request:
     branches:
       - main  
+
 jobs:
   check:
     runs-on: ubuntu-latest
 
-    # Use the maximum number of CPUs available
     strategy:
       matrix:
         python-version: [3.8, 3.9, 3.10]  
@@ -22,28 +23,38 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10.4'
+          python-version: ${{ matrix.python-version }}  # Use the matrix variable here
+
+      - name: Cache Python packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('*/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Run Tests
+      - name: Run Tests with Coverage
         run: |
-          pytest -n auto --maxfail=1 --cov=. --cov-report=term
+          pytest -n auto --maxfail=1 --cov=. --cov-report=xml
 
-      - name: Upload coverage report
+      - name: Upload Coverage Report to Codecov
         if: success()
-        run: |
-            pip install coveralls  
-            coveralls
-
-      - name: Cache Python packages
-        uses: actions/cache@v2
+        uses: codecov/codecov-action@v3
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
 
+      - name: Security Scan with Snyk
+        if: github.ref == 'refs/heads/main'
+        uses: snyk/actions/setup@v2
+        with:
+          token: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk to check for vulnerabilities
+        if: github.ref == 'refs/heads/main'
+        run: snyk test --file=requirements.txt --severity-threshold=medium
