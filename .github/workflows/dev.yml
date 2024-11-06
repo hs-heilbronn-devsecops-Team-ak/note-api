@@ -4,50 +4,64 @@ on:
   pull_request:
     branches:
       - main
-      - ankita_pytest  # Run tests on pull requests to this branch
+      - ankita_pytest
   push:
     branches:
-      - main 
-      - ankita_pytest  # Run security scan on every push to main
+      - main
+      - ankita_pytest
 
 jobs:
-  # Job to run tests and measure coverage
-  test:
+  tests:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Specify your Python version, e.g., 3.8
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -r requirements.txt
+
+      - name: Run tests with pytest
+        run: |
+          pytest -n auto --cov --cov-report=xml
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      # Optional: Upload coverage report to Codecov for coverage analysis
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: always()
+
+  security_scan:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # Run only on merges to main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-xdist  # Install pytest tools
 
-      - name: Run tests with pytest in parallel
-        run: pytest -n auto --cov=.  # -n auto uses all available CPUs for parallel tests
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Ensure CODECOV_TOKEN is set in GitHub Secrets
-
-  # Job to run Snyk security scan on main branch
-  snyk:
-    needs: test  # Run after test job completes
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-
-      - name: Run Snyk to check for vulnerabilities
+      - name: Run Snyk Security Scan
         uses: snyk/actions/python@master
+        with:
+          args: test
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Ensure SNYK_TOKEN is set in GitHub Secrets
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
