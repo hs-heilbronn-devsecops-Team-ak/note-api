@@ -27,6 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
           pip install -r requirements.txt
+          pip install pytest  # Explicitly install pytest if not in requirements
 
   tests:
     runs-on: ubuntu-latest
