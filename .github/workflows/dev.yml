@@ -11,14 +11,13 @@ on:
       - ankita_pytest 
 
 jobs:
-
   tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         # Running tests on multiple Python versions for compatibility
         python-version: ['3.10', '3.11', '3.12'] 
-        cpu: [2, 4, 8] 
+        cpu: [4] 
 
     steps:
       - name: Checkout code
@@ -34,6 +33,15 @@ jobs:
           python -m pip install --upgrade pip  
           pip install -r requirements-dev.txt  
           pip install -r requirements.txt  
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
 
       - name: Run tests with pytest
         run: |
