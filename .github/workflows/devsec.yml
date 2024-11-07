@@ -1,4 +1,4 @@
-name: dev pipeline
+name: Build, Scan and Push Docker File
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
       - kiran_pytest 
 
 jobs:
-  security_scan:
+  security-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -21,12 +21,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
 
       - name: Run Snyk Security Scan
         uses: snyk/actions/python@master

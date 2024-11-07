@@ -11,7 +11,7 @@ on:
       - ankita_pytest 
 
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -41,9 +41,10 @@ jobs:
             ${{ runner.os }}-pip-
 
 
-      - name: Run tests with pytest
+      - name: Test with pytest and coverage on branch ${{ github.ref }}
         run: |
-          pytest -n ${{ matrix.cpu }} --cov --cov-report=xml  
+          pytest tests
+          pytest --cov=note_api -n auto
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3  
