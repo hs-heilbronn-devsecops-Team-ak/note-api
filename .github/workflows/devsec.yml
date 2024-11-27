@@ -4,11 +4,11 @@ on:
   pull_request:
     branches:
       - main
-      - kiran_pytest  
+      - kiran_exercise3 
   push:
     branches:
       - main
-      - kiran_pytest 
+      - kiran_exercise3
 
 jobs:
   security-scan:
