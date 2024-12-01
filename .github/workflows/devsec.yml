@@ -73,44 +73,47 @@ jobs:
           tags: ghcr.io/hs-heilbronn-devsecops-team-ak/note-api:latest  
 
   Deploy-to-Google-Cloud-Run:
-    runs-on: ubuntu-latest
-    needs: build_and_push
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Check out the code
-        uses: actions/checkout@v3
+  runs-on: ubuntu-latest
+  needs: build_and_push
+  permissions:
+    id-token: write
+    contents: read
+  env:
+    PROJECT_ID: 'note-api'
+    REGION: 'europe-west3'
+    IMAGE: 'europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api/main:latest'
+    SERVICE: 'note-api-hs-heilbronn-devsecops-team-ak'
+    FULL_IMAGE_TAG: 'europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api-hs-heilbronn-devsecops-team-ak/note-api/main:latest'
   
-      - name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'
-          service_account: 'hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com'
-  
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: 'note-api'
-  
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker europe-west3-docker.pkg.dev --quiet
-  
-      - name: Build Docker image for Artifact Registry
-        run: |
-          docker build -t europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api/main:latest .
-  
-      - name: Tag and Push Docker image to Artifact Registry
-        run: |
-          docker tag europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api/main:latest \
-          europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api-hs-heilbronn-devsecops-team-ak/note-api/main:latest
-          docker push europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api-hs-heilbronn-devsecops-team-ak/note-api/main:latest
-  
-      - name: Deploy Docker image to Google Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: 'note-api-hs-heilbronn-devsecops-team-ak'
-          image: 'europe-west3-docker.pkg.dev/hs-heilbronn-devsecops/cloud-run-source-deploy/note-api-hs-heilbronn-devsecops-team-ak/note-api/main:latest'
-          region: 'europe-west3'
-          env_vars: BACKEND=memory
+  steps:
+    - name: Check out the code
+      uses: actions/checkout@v3
+
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'
+        service_account: 'hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com'
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Configure Docker for Artifact Registry
+      run: |
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+    - name: Build, Tag, and Push Docker image to Artifact Registry
+      run: |
+        docker build -t ${{ env.IMAGE }} .
+        docker tag ${{ env.IMAGE }} ${{ env.FULL_IMAGE_TAG }}
+        docker push ${{ env.FULL_IMAGE_TAG }}
+
+    - name: Deploy Docker image to Google Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: ${{ env.SERVICE }}
+        image: ${{ env.FULL_IMAGE_TAG }}
+        region: ${{ env.REGION }}
+        env_vars: BACKEND=memory
