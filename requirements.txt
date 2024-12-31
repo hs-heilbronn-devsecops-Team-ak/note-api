@@ -5,6 +5,8 @@ redis
 uvicorn[standard]
 opentelemetry-api
 opentelemetry-sdk
-opentelemetry-exporter-google-cloud
+opentelemetry-exporter-gcp-trace
+opentelemetry-instrumentation-fastapi
+
 
 
