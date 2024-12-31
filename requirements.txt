@@ -7,8 +7,4 @@ opentelemetry-api
 opentelemetry-sdk
 opentelemetry-exporter-gcp-trace
 opentelemetry-instrumentation-fastapi
-requests>=2.32.2 
-setuptools>=70.0.0 
-urllib3>=2.2.2 
-zipp>=3.19.1
 
