@@ -79,7 +79,7 @@ def create_note(request: CreateNoteRequest,
     return note_id
 
 
-@app.get("/custom-span, , summary="Demonstrate Custom Span")
+@app.get("/custom-span")
 async def custom_span():
     tracer = trace.get_tracer(__name__)
     with tracer.start_as_current_span("custom-operation"):
