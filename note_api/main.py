@@ -13,7 +13,7 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-# from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 
 app = FastAPI()
 
@@ -24,10 +24,10 @@ tracer_provider = trace.get_tracer_provider()
 
 FastAPIInstrumentor.instrument_app(app)
 
-# if getenv("ENABLE_GCP_EXPORTER", "false").lower() == "true":
-#     gcp_exporter = CloudTraceSpanExporter()
-#     span_processor = BatchSpanProcessor(gcp_exporter)
-#     tracer_provider.add_span_processor(span_processor)
+if getenv("ENABLE_GCP_EXPORTER", "false").lower() == "true":
+    gcp_exporter = CloudTraceSpanExporter()
+    span_processor = BatchSpanProcessor(gcp_exporter)
+    tracer_provider.add_span_processor(span_processor)
 
 def get_backend() -> Backend:
     global my_backend  # pylint: disable=global-statement
