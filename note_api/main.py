@@ -9,10 +9,25 @@ from starlette.responses import RedirectResponse
 from .backends import Backend, RedisBackend, MemoryBackend, GCSBackend
 from .model import Note, CreateNoteRequest
 
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+
 app = FastAPI()
 
 my_backend: Optional[Backend] = None
 
+trace.set_tracer_provider(TracerProvider())
+tracer_provider = trace.get_tracer_provider()
+
+FastAPIInstrumentor.instrument_app(app)
+
+if getenv("ENABLE_GCP_EXPORTER", "false").lower() == "true":
+    gcp_exporter = CloudTraceSpanExporter()
+    span_processor = BatchSpanProcessor(gcp_exporter)
+    tracer_provider.add_span_processor(span_processor)
 
 def get_backend() -> Backend:
     global my_backend  # pylint: disable=global-statement
@@ -30,7 +45,7 @@ def get_backend() -> Backend:
 
 @app.get('/')
 def redirect_to_notes() -> None:
-    return RedirectResponse(url='/Notes')
+    return RedirectResponse(url='/notes')
 
 
 @app.get('/notes')
@@ -62,3 +77,11 @@ def create_note(request: CreateNoteRequest,
     note_id = str(uuid4())
     backend.set(note_id, request)
     return note_id
+
+
+@app.get("/custom-span")
+async def custom_span():
+    tracer = trace.get_tracer(__name__)
+    with tracer.start_as_current_span("custom-operation"):
+        result = {"message": "Custom span in action!"}
+        return result

@@ -3,10 +3,13 @@ fastapi
 google-cloud-storage
 redis
 uvicorn[standard]
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-gcp-trace
+opentelemetry-instrumentation-fastapi
 starlette>=0.40.0 # not directly required, pinned by Snyk to avoid a vulnerability
 urllib3>=2.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
 requests>=2.32.2 # not directly required, pinned by Snyk to avoid a vulnerability
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
 anyio>=4.4.0 # not directly required, pinned by Snyk to avoid a vulnerability
-
 
