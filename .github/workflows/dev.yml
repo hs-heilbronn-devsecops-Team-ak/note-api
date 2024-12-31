@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-      - ankita_pytest  
+      - ak_exercise4 
   push:
     branches:
       - main

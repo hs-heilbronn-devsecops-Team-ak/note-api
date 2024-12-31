@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-      - kiran_exercise3 
+      - ak_exercise4 
   push:
     branches:
       - main
