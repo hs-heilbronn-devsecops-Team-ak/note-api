@@ -12,7 +12,6 @@ WORKDIR /code
 
 COPY ./requirements.txt /code/requirements.txt
 RUN pip3 install -r requirements.txt
-RUN pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-google-cloud opentelemetry-instrumentation-fastapi
 
 COPY ./note_api /code/note_api
 
